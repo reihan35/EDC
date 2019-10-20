@@ -1,6 +1,7 @@
 package algorithms;
 
 import java.awt.Point;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,13 +27,34 @@ public class DefaultTeam {
 		// if (false) result = readFromFile("output0.points");
 		// else saveToFile("output",result);
 		// <<<<< REMOVE
-		System.out.println(TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold))));
+		for (int i = 0; i < points.size()/2 / 3; i++)
+			result.add(points.get(i));
+		//System.out.println(TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold))));
 		//System.out.println(IsValid(maximalIndependentSet(points, edgeThreshold), edgeThreshold ) );
 		//System.out.println(points.size());
+		//System.out.println(IsValid(MIS2(points,edgeThreshold),edgeThreshold));
+		System.out.println(MIS2(points,edgeThreshold).size());
 		//System.out.println(maximalIndependentSet(points, edgeThreshold).size());
-		return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold)));
+		//return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold)));
+		return result;
 	}
 	
+	
+	/*public ArrayList<Point> S-MIS(ArrayList<Point> points, int edgeThreshold){
+		ArrayList<Point> blackPoints = maximalIndependentSet(points, edgeThreshold);
+		ArrayList<Point> clonePointes = ((ArrayList<Point>) points.clone());
+		clonePointes.removeAll(blackPoints);
+		ArrayList<Point> greyPoints = clonePointes;
+		ArrayList<Integer> ints = new ArrayList<Integer>();
+		ints.add(5);
+		ints.add(4);
+		ints.add(3);
+		ints.add(2);
+		ArrayList<Point> bluePoints = new ArrayList<Point>();
+		for(int i : ints) {
+			
+		}
+	}*/
 	public ArrayList<Point> TreeToPoints(Tree2D tree){
 		System.out.println("je rentre dedans");
 
@@ -62,6 +84,59 @@ public class DefaultTeam {
 		return result;
 	}
 	
+	public HashMap<Point, Integer> voisinDevoisin(ArrayList<Point> points,HashMap<Point,Integer> degrees,Point p,int edgeThreshold,ArrayList<Point> w){
+		ArrayList<Point> results = new ArrayList<Point>();
+		for(Point r : neighbor(p, points, edgeThreshold)) {
+			for (Point q : neighbor(r, points, edgeThreshold)) {
+				if (q!=null && w.contains(q)) {
+					int val = degrees.get(q);
+					if(val!=0)
+						val = val - 1;
+						degrees.put(q,val);
+				}
+			}
+		}
+		return degrees;
+	}
+	
+	public Point min(HashMap<Point, Integer> degrees,ArrayList<Point> b) {
+		System.out.println(b);
+		Point min = b.get(0);
+		for(Point p : degrees.keySet()) {
+			if(b.contains(p) && degrees.get(p)<degrees.get(min)) {
+				min = p;
+			}
+		}
+		return min;
+	}
+	
+	public ArrayList<Point> MIS2 (ArrayList<Point> points, int edgeThreshold){
+		ArrayList<Point> whitePs = points;
+		ArrayList<Point> blackPs = new ArrayList<Point>();
+		ArrayList<Point> greyPs = new ArrayList<Point>();
+		HashMap<Point, Integer> degrees = new HashMap<Point, Integer>();
+		
+		for(Point p : points) {
+			ArrayList<Point> ne = neighbor(p, points, edgeThreshold);
+			if (ne != null) {
+				degrees.put(p,ne.size());
+			}else {
+				degrees.put(p,0);
+			}
+		}
+		
+		Point start = whitePs.get(0);
+		while (whitePs.size() > 0) {
+			whitePs.remove(start);
+			blackPs.add(start);
+			greyPs.addAll(neighbor(start, points, edgeThreshold));
+			degrees = voisinDevoisin(points, degrees, start, edgeThreshold,whitePs);
+			if(whitePs.size()>0)
+				start = min(degrees,whitePs);
+		}
+		return blackPs;
+	}
+	
 	public boolean IsValid(ArrayList<Point> vertices, int edgeThreshold ) {	
 		for(Point p : vertices) {
 			if(neighbor(p, vertices, edgeThreshold).size() > 0) {
@@ -83,7 +158,7 @@ public class DefaultTeam {
 		return currentVs;
 	}
 
-
+	
 	// FILE PRINTER
 	private void saveToFile(String filename, ArrayList<Point> result) {
 		int index = 0;
@@ -478,10 +553,7 @@ public class DefaultTeam {
 			kruskafter.addAll(replace(a, points, paths));
 		}
 		System.out.println(kruskafter.size());
-		System.out.println("salut22");
 		Tree2D T0 = areteToTree(kruskafter);
-		System.out.println("salut22fdsfds");
-
 		System.out.println(T0);
 		return T0;
 	}
