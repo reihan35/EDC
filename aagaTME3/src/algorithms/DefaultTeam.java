@@ -33,7 +33,7 @@ public class DefaultTeam {
 		//System.out.println(IsValid(maximalIndependentSet(points, edgeThreshold), edgeThreshold ) );
 		//System.out.println(points.size());
 		//System.out.println(IsValid(MIS2(points,edgeThreshold),edgeThreshold));
-		System.out.println(MIS2(points,edgeThreshold).size());
+		//System.out.println(MIS2(points,edgeThreshold).size());
 		//System.out.println(maximalIndependentSet(points, edgeThreshold).size());
 		//return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold)));
 		return result;
@@ -130,6 +130,7 @@ public class DefaultTeam {
 			whitePs.remove(start);
 			blackPs.add(start);
 			greyPs.addAll(neighbor(start, points, edgeThreshold));
+			whitePs.removeAll(neighbor(start, points, edgeThreshold));
 			degrees = voisinDevoisin(points, degrees, start, edgeThreshold,whitePs);
 			if(whitePs.size()>0)
 				start = min(degrees,whitePs);
