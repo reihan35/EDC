@@ -31,11 +31,16 @@ public class DefaultTeam {
 			result.add(points.get(i));
 		//System.out.println(TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold))));
 		//System.out.println(IsValid(maximalIndependentSet(points, edgeThreshold), edgeThreshold ) );
+		//System.out.println(maximalIndependentSet(points, edgeThreshold).size());
 		//System.out.println(points.size());
 		//System.out.println(IsValid(MIS2(points,edgeThreshold),edgeThreshold));
-		//System.out.println(MIS2(points,edgeThreshold).size());
+		ArrayList<Point> points2 = (ArrayList<Point>) points.clone();
+		//System.out.println(Verify2Hopes(MIS2(points,edgeThreshold),edgeThreshold,points2));
+		//System.out.println(MIS2(points,edgeThreshold));
 		//System.out.println(maximalIndependentSet(points, edgeThreshold).size());
 		//return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold)));
+		System.out.println("voici le res : " + EDC(MIS2(points,edgeThreshold), points2, edgeThreshold));
+		//return EDC(MIS2(points,edgeThreshold), points2, edgeThreshold);
 		return result;
 	}
 	
@@ -82,6 +87,28 @@ public class DefaultTeam {
 			if (point.distance(p) < edgeThreshold && !point.equals(p))
 				result.add((Point) point.clone());
 		return result;
+	}
+	public boolean Verify2Hopes(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> fP) {
+		System.out.println("FP"+ fP);
+		for(Point p : points) {
+			for(Point q : points) {
+				if (p!=q && !voisDevois(p, fP, edgeThreshold).contains(q)) {
+					System.out.println(p);
+					System.out.println(q);
+					System.out.println(voisDevois(p, fP, edgeThreshold));
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	public ArrayList<Point> voisDevois(Point p, ArrayList<Point> points,int edgeThreshold){
+		ArrayList<Point> results = new ArrayList<Point>();
+		for(Point r : neighbor(p, points, edgeThreshold)) {
+			results.addAll(neighbor(r, points, edgeThreshold));
+		}
+		return results;
 	}
 	
 	public HashMap<Point, Integer> voisinDevoisin(ArrayList<Point> points,HashMap<Point,Integer> degrees,Point p,int edgeThreshold,ArrayList<Point> w){
@@ -135,7 +162,103 @@ public class DefaultTeam {
 			if(whitePs.size()>0)
 				start = min(degrees,whitePs);
 		}
+		System.out.println("GRIS EST" + greyPs);
 		return blackPs;
+	}
+	
+	//Cette fonction renvoie la liste des composants aux quels p apprtient
+	public ArrayList<ArrayList<Point>> ListOfCompos(ArrayList<ArrayList<Point>> comps,Point p ){
+		ArrayList<ArrayList<Point>> res = new ArrayList<ArrayList<Point>>();
+		for(ArrayList<Point> a : comps) {
+			if(a.contains(p)) {
+				res.add(a);
+			}
+		}
+		return res;
+	}
+	
+	public boolean IsAdjInToIComposent(Point p,ArrayList<Point> points,ArrayList<ArrayList<Point>> comps,int edgeThreshold,int nbr,ArrayList<Point> blackPs) {
+		ArrayList<ArrayList<Point>> visited = new ArrayList<ArrayList<Point>>();
+		for(Point v : neighbor(p, points, edgeThreshold)){
+			if(blackPs.contains(v)) {
+				//System.out.println("j'arrive quand meme a venir la");
+				ArrayList<ArrayList<Point>> list = ListOfCompos(comps,v);
+				//System.out.println("la liste de compos de v est : " + list);
+				if(list!=null) {
+					for(ArrayList<Point> a : list) {
+						if (!visited.contains(a)) {
+							visited.add(a);
+						}
+					}
+				}
+			}
+		}
+		System.out.println(visited.size());
+		System.out.println("nbr vaut " + nbr);
+		System.out.println(visited.size()>=nbr);
+		return visited.size()>=nbr;
+	}
+	
+	public Point existsGreyNodeThat(ArrayList<Point> greyPs,ArrayList<Point> points,ArrayList<ArrayList<Point>> comps,int edgeThreshold,int nbr,ArrayList<Point> blackPs) {
+		for(Point p : greyPs) {
+			if (IsAdjInToIComposent(p, points, comps, edgeThreshold, nbr, blackPs)) {
+				return p;
+			}
+		}
+		
+		return null;
+	}
+	
+	public ArrayList<ArrayList<Point>> unionOfCompos(ArrayList<ArrayList<Point>> components,Point p,ArrayList<Point> points,int edgeThreshold,ArrayList<Point> blacks){
+		ArrayList<Point> union = new ArrayList<>();
+		for(Point v : neighbor(p, points, edgeThreshold)) {
+			if(blacks.contains(v)) {
+				ArrayList<ArrayList<Point>> list = ListOfCompos(components,v);
+				if(list!=null) {
+					System.out.println("!!!!!!!!!!!!!!!" + v + list.get(0));
+					union.addAll(list.get(0)); //On cree la nouvelle composant
+					System.out.println("??????U" + union);
+					components.remove(list.get(0)); //On enelve les anciennes composantes
+				}
+			}
+		}
+		union.add(p);
+		components.add(union);
+		return components;
+	}
+	
+	public ArrayList<Point> EDC(ArrayList<Point> MIS,ArrayList<Point> points,int edgeThreshold){
+		ArrayList<ArrayList<Point>> components = new ArrayList<ArrayList<Point>>();
+		for(Point p : MIS) {
+			ArrayList<Point> a = new ArrayList<Point>();
+			a.add(p);
+			components.add(a);
+		}
+		ArrayList<Point> blackPs = MIS;
+		ArrayList<Point> bluePs = new ArrayList<Point>();
+		ArrayList<Point> greyPs = (ArrayList<Point>) points.clone();
+		greyPs.removeAll(MIS);
+		ArrayList<Integer> nums = new ArrayList<Integer>();
+		nums.add(5);
+		nums.add(4);
+		nums.add(3);
+		nums.add(2);
+		
+		System.out.print("je suis laaaa" + greyPs);
+
+		for(int i : nums) {
+			System.out.println("je rentre");
+			Point p = existsGreyNodeThat(greyPs, points, components, edgeThreshold, i, blackPs);
+				while(p!=null) {
+					System.out.println("P" + p);
+					bluePs.add(p);
+					greyPs.remove(p);
+					System.out.println(bluePs);
+					components = unionOfCompos(components, p, points, edgeThreshold, blackPs);
+				}
+			}
+		
+		return bluePs;
 	}
 	
 	public boolean IsValid(ArrayList<Point> vertices, int edgeThreshold ) {	
