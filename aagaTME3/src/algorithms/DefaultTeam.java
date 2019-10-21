@@ -34,14 +34,18 @@ public class DefaultTeam {
 		//System.out.println(maximalIndependentSet(points, edgeThreshold).size());
 		//System.out.println(points.size());
 		//System.out.println(IsValid(MIS2(points,edgeThreshold),edgeThreshold));
+		ArrayList<Point> points4 = (ArrayList<Point>) points.clone();
 		ArrayList<Point> points2 = (ArrayList<Point>) points.clone();
 		//System.out.println(Verify2Hopes(MIS2(points,edgeThreshold),edgeThreshold,points2));
 		//System.out.println(MIS2(points,edgeThreshold));
 		//System.out.println(maximalIndependentSet(points, edgeThreshold).size());
 		//return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold)));
-		System.out.println("voici le res : " + EDC(MIS2(points,edgeThreshold), points2, edgeThreshold));
+		//System.out.println("voici le res : " + EDC(MIS2(points,edgeThreshold), points2, edgeThreshold).size());
+		ArrayList<Point> point3 = MIS2(points, edgeThreshold);
+		point3.addAll(EDC(point3, points2, edgeThreshold));
 		//return EDC(MIS2(points,edgeThreshold), points2, edgeThreshold);
-		return result;
+		System.out.println("ET VOILA " + IsValidED(points4, point3, edgeThreshold));
+		return point3;
 	}
 	
 	
@@ -214,16 +218,17 @@ public class DefaultTeam {
 		for(Point v : neighbor(p, points, edgeThreshold)) {
 			if(blacks.contains(v)) {
 				ArrayList<ArrayList<Point>> list = ListOfCompos(components,v);
-				if(list!=null) {
-					System.out.println("!!!!!!!!!!!!!!!" + v + list.get(0));
+				if(list.size()>0) {
+					//System.out.println("!!!!!!!!!!!!!!!" + v + list.get(0));
 					union.addAll(list.get(0)); //On cree la nouvelle composant
-					System.out.println("??????U" + union);
+					//System.out.println("??????U" + union);
 					components.remove(list.get(0)); //On enelve les anciennes composantes
 				}
 			}
 		}
 		union.add(p);
 		components.add(union);
+		System.out.println("nouveau compos" + components);
 		return components;
 	}
 	
@@ -247,9 +252,9 @@ public class DefaultTeam {
 		System.out.print("je suis laaaa" + greyPs);
 
 		for(int i : nums) {
-			System.out.println("je rentre");
-			Point p = existsGreyNodeThat(greyPs, points, components, edgeThreshold, i, blackPs);
-				while(p!=null) {
+			System.out.println("je rentre §§§§§§§§§§§" + i);
+				while(existsGreyNodeThat(greyPs, points, components, edgeThreshold, i, blackPs)!=null) {
+					Point p=existsGreyNodeThat(greyPs, points, components, edgeThreshold, i, blackPs);
 					System.out.println("P" + p);
 					bluePs.add(p);
 					greyPs.remove(p);
@@ -269,6 +274,14 @@ public class DefaultTeam {
 		}
 		return true;
 		
+	}
+	private boolean IsValidED(ArrayList<Point> vertices, ArrayList<Point> DS, int edgeThreshold) {
+		for (Point p : DS) {
+			vertices.remove(p);
+			vertices.removeAll(neighbor(p, vertices, edgeThreshold));
+		}
+		Boolean isv = vertices.size() == 0;
+		return vertices.size() == 0;
 	}
 	
 	public ArrayList<Point> maximalIndependentSet(ArrayList<Point> vertices, int edgeThreshold){
