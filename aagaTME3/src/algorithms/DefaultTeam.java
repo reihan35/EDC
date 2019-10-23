@@ -3,9 +3,13 @@ package algorithms;
 import java.awt.Point;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
 
 import algorithms.DefaultTeam.Arete;
 import algorithms.DefaultTeam.PointIdent;
@@ -41,14 +45,44 @@ public class DefaultTeam {
 		//System.out.println(maximalIndependentSet(points, edgeThreshold).size());
 		//return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold)));
 		//System.out.println("voici le res : " + EDC(MIS2(points,edgeThreshold), points2, edgeThreshold).size());
-		ArrayList<Point> point3 = MIS2(points, edgeThreshold);
-		point3.addAll(EDC(point3, points2, edgeThreshold));
+		ArrayList<Point> point3 = MIS3(points, edgeThreshold);
+		System.out.println("Nombre de noeuds noir" + point3.size());
+		//point3.addAll(EDC(point3, points2, edgeThreshold));
 		//return EDC(MIS2(points,edgeThreshold), points2, edgeThreshold);
-		System.out.println("ET VOILA " + IsValidED(points4, point3, edgeThreshold));
+		//System.out.println("ET VOILA " + IsValidED(points4, point3, edgeThreshold));
+		//System.out.println("ET VOILA " + BFS(point3, edgeThreshold).size());
+		//System.out.println("ALORS" + point3);
+		//System.out.println("les voisin de lui sont" + nsOf(edgeThreshold,point3,239,642));
+		//System.out.println(MIS2(points, edgeThreshold).size());
+		//return MIS2(points, edgeThreshold);
 		return point3;
 	}
 	
-	
+	public ArrayList<Point> BFS(ArrayList<Point> points, int edgeThreshold) {
+		ArrayList<Point> marquee = new ArrayList<Point>();
+		Queue<Integer> f = new PriorityQueue<Integer>();
+		f.add(0);
+		marquee.add(points.get(0));
+		System.out.println("AU DEBUTTTT!!!!!!!!!!!!!" + marquee);
+		while(!f.isEmpty()){
+			int s = f.remove();
+			System.out.println("je rentre");
+			System.out.print(s);
+			System.out.println(f);
+			//System.out.println(neighbor(points.get(s), points, edgeThreshold));
+			for (Point t : neighbor(points.get(s), points, edgeThreshold)) {
+				System.out.println(marquee);
+				System.out.println("CA CONTIENTtttttttttt" + marquee.contains(t));
+				if(marquee.contains(t)==false) {
+					System.out.println("YOOOOOOOOOOOOOOO");
+					f.add(points.indexOf(t));
+					//System.out.println("YOOOOOOOOOOOOOOO");
+					marquee.add(t);
+				}
+			}
+		}
+		return marquee;
+	}
 	/*public ArrayList<Point> S-MIS(ArrayList<Point> points, int edgeThreshold){
 		ArrayList<Point> blackPoints = maximalIndependentSet(points, edgeThreshold);
 		ArrayList<Point> clonePointes = ((ArrayList<Point>) points.clone());
@@ -92,7 +126,7 @@ public class DefaultTeam {
 				result.add((Point) point.clone());
 		return result;
 	}
-	public boolean Verify2Hopes(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> fP) {
+	/*public boolean Verify2Hopes(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> fP) {
 		System.out.println("FP"+ fP);
 		for(Point p : points) {
 			for(Point q : points) {
@@ -105,14 +139,42 @@ public class DefaultTeam {
 			}
 		}
 		return true;
+	}*/
+	public ArrayList<Point> nsOf(int edgeThreshold,ArrayList<Point> points , int x , int y){
+		for(Point p : points) {
+			if ((p.x == x) && (p.y == y)){
+				return neighbor(p, points, edgeThreshold);
+			}
+		}
+		return null;
 	}
 	
-	public ArrayList<Point> voisDevois(Point p, ArrayList<Point> points,int edgeThreshold){
+	public ArrayList<Point> voisDevois(Point p, ArrayList<Point> points,ArrayList<Point> b,int edgeThreshold){
 		ArrayList<Point> results = new ArrayList<Point>();
 		for(Point r : neighbor(p, points, edgeThreshold)) {
-			results.addAll(neighbor(r, points, edgeThreshold));
+			for (Point q : neighbor(r, points, edgeThreshold)) {
+				if (q!=null && b.contains(q)) {
+					results.add(q);
+				}
+			}
 		}
 		return results;
+		/*if(results.get(0)!=null) {
+			return results.get(0);
+		}
+		else {
+			return null;
+		}
+		/*for (Point s : results) {
+			for(Point r : neighbor(s, points, edgeThreshold)) {
+				for (Point q : neighbor(r, points, edgeThreshold)) {
+					if (b.contains(q)) {
+						return q;
+					}
+				}
+			}
+		}
+		return null;*/
 	}
 	
 	public HashMap<Point, Integer> voisinDevoisin(ArrayList<Point> points,HashMap<Point,Integer> degrees,Point p,int edgeThreshold,ArrayList<Point> w){
@@ -169,6 +231,58 @@ public class DefaultTeam {
 		System.out.println("GRIS EST" + greyPs);
 		return blackPs;
 	}
+	public Point hasVoisDeVoisBlack(Point p, ArrayList<Point> points,int edgeThreshold,ArrayList<Point> black) {
+		for (Point s : voisDevois(p, points, black, edgeThreshold)){
+			return s;
+		}
+		return null;
+		
+	}
+	
+	public ArrayList<Point> MIS3 (ArrayList<Point> points, int edgeThreshold){
+		ArrayList<Point> whitePs = points;
+		ArrayList<Point> blackPs = new ArrayList<Point>();
+		ArrayList<Point> greyPs = new ArrayList<Point>();
+		
+		
+		Point start = whitePs.get(0);
+		System.out.println("je suis premier" + whitePs.get(0));
+		while (whitePs.size() > 0) {
+			System.out.println("whar");
+			System.out.println(whitePs);
+			whitePs.remove(start);
+			blackPs.add(start);
+			greyPs.addAll(neighbor(start, points, edgeThreshold));
+			whitePs.removeAll(neighbor(start, points, edgeThreshold));
+			if (whitePs.size()>0) {
+				
+				/*for(Point p : whitePs) {
+					for(Point s : neighbor(p, points, edgeThreshold)) {
+						for(Point q : neighbor(s, points, edgeThreshold)) {
+							System.out.println("JE COMPREND PAS" + neighbor(q, points, edgeThreshold));
+							if(blackPs.contains(q)) {
+								System.out.println("je rentre pas la");
+								start = p;
+							}
+							else {
+								start = whitePs.get(0);
+
+							}
+						}
+					}
+				}*/
+				start = whitePs.get(0);
+
+			}
+			//start = whitePs.get(0);
+
+		}
+
+		System.out.println("GRIS EST" + greyPs);
+		return blackPs;
+				//start = whitePs.get(0);
+				//hasVoisDeVoisBlack(p, points, edgeThreshold, blackPs);
+		}
 	
 	//Cette fonction renvoie la liste des composants aux quels p apprtient
 	public ArrayList<ArrayList<Point>> ListOfCompos(ArrayList<ArrayList<Point>> comps,Point p ){
@@ -180,14 +294,33 @@ public class DefaultTeam {
 		}
 		return res;
 	}
+	public boolean hasBlack(ArrayList<ArrayList<Point>> comp,ArrayList<Point> black) {
+		for(ArrayList<Point> l : comp)
+		{
+			for(Point p : l) {
+				if (black.contains(p)){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	public boolean IsAdjInToIComposent(Point p,ArrayList<Point> points,ArrayList<ArrayList<Point>> comps,int edgeThreshold,int nbr,ArrayList<Point> blackPs) {
 		ArrayList<ArrayList<Point>> visited = new ArrayList<ArrayList<Point>>();
+		
+		if(p.x == 239 && p.y == 642) {
+			System.out.println("BIEN SUR");
+		}
 		for(Point v : neighbor(p, points, edgeThreshold)){
 			if(blackPs.contains(v)) {
 				//System.out.println("j'arrive quand meme a venir la");
 				ArrayList<ArrayList<Point>> list = ListOfCompos(comps,v);
-				//System.out.println("la liste de compos de v est : " + list);
+				//if(hasBlack(list, blackPs)) {
+				//java.awt.Point[x=296,y=635], java.awt.Point[x=317,y=620]
+				if(p.x == 265 && p.y == 625) {
+					System.out.println("KHODAYA" + v + " " + list.size());
+				}
 				if(list!=null) {
 					for(ArrayList<Point> a : list) {
 						if (!visited.contains(a)) {
@@ -195,11 +328,15 @@ public class DefaultTeam {
 						}
 					}
 				}
+			//}
 			}
 		}
-		System.out.println(visited.size());
-		System.out.println("nbr vaut " + nbr);
-		System.out.println(visited.size()>=nbr);
+		//le noeud gris qui devient pas bleu
+		if(p.x == 265 && p.y == 625) {
+			System.out.println("VISITED" + visited);
+			System.out.println("VOISIIIINNN" + neighbor(p, points, edgeThreshold));
+		}
+		
 		return visited.size()>=nbr;
 	}
 	
@@ -214,10 +351,13 @@ public class DefaultTeam {
 	}
 	
 	public ArrayList<ArrayList<Point>> unionOfCompos(ArrayList<ArrayList<Point>> components,Point p,ArrayList<Point> points,int edgeThreshold,ArrayList<Point> blacks){
+		
 		ArrayList<Point> union = new ArrayList<>();
 		for(Point v : neighbor(p, points, edgeThreshold)) {
 			if(blacks.contains(v)) {
 				ArrayList<ArrayList<Point>> list = ListOfCompos(components,v);
+				
+				
 				if(list.size()>0) {
 					//System.out.println("!!!!!!!!!!!!!!!" + v + list.get(0));
 					union.addAll(list.get(0)); //On cree la nouvelle composant
@@ -226,6 +366,7 @@ public class DefaultTeam {
 				}
 			}
 		}
+		
 		union.add(p);
 		components.add(union);
 		System.out.println("nouveau compos" + components);
@@ -240,29 +381,37 @@ public class DefaultTeam {
 			components.add(a);
 		}
 		ArrayList<Point> blackPs = MIS;
+		for(Point v : blackPs) {
+			if(v.x == 239 && v.y == 642) {
+				System.out.println("BIEN SURRRRRRRRRRRRRRRRRR" + neighbor(v, points, edgeThreshold));
+			}
+		}
 		ArrayList<Point> bluePs = new ArrayList<Point>();
 		ArrayList<Point> greyPs = (ArrayList<Point>) points.clone();
-		greyPs.removeAll(MIS);
+		greyPs.removeAll((Collection<Point>) MIS.clone());
+		System.out.println("GRISGRIIIIS" + greyPs.size());
 		ArrayList<Integer> nums = new ArrayList<Integer>();
 		nums.add(5);
 		nums.add(4);
 		nums.add(3);
 		nums.add(2);
 		
-		System.out.print("je suis laaaa" + greyPs);
-
+		System.out.println("je suis laaaa" + blackPs);
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		for(int i : nums) {
-			System.out.println("je rentre §§§§§§§§§§§" + i);
-				while(existsGreyNodeThat(greyPs, points, components, edgeThreshold, i, blackPs)!=null) {
+			while(existsGreyNodeThat(greyPs, points, components, edgeThreshold, i, blackPs)!=null) {
 					Point p=existsGreyNodeThat(greyPs, points, components, edgeThreshold, i, blackPs);
 					System.out.println("P" + p);
-					bluePs.add(p);
 					greyPs.remove(p);
+					bluePs.add(p);
+					System.out.println(i+ "!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 					System.out.println(bluePs);
 					components = unionOfCompos(components, p, points, edgeThreshold, blackPs);
 				}
+			System.out.println("greyPs : mmmmmmmm" + greyPs);
 			}
-		
+		System.out.println(greyPs);
+		System.out.println("blueeeeeeeeeeeeeeeeeeeeeeeeees" + bluePs);
 		return bluePs;
 	}
 	
