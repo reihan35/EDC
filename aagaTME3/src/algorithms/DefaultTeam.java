@@ -45,7 +45,7 @@ public class DefaultTeam {
 		//System.out.println(maximalIndependentSet(points, edgeThreshold).size());
 		//return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold)));
 		//System.out.println("voici le res : " + EDC(MIS2(points,edgeThreshold), points2, edgeThreshold).size());
-		ArrayList<Point> point3 = MIS3(points, edgeThreshold);
+		ArrayList<Point> point3 = MIS2(points, edgeThreshold);
 		System.out.println("Nombre de noeuds noir" + point3.size());
 		//point3.addAll(EDC(point3, points2, edgeThreshold));
 		//return EDC(MIS2(points,edgeThreshold), points2, edgeThreshold);
@@ -192,15 +192,15 @@ public class DefaultTeam {
 		return degrees;
 	}
 	
-	public Point min(HashMap<Point, Integer> degrees,ArrayList<Point> b) {
+	public Point max(HashMap<Point, Integer> degrees,ArrayList<Point> b) {
 		System.out.println(b);
-		Point min = b.get(0);
+		Point max = b.get(0);
 		for(Point p : degrees.keySet()) {
-			if(b.contains(p) && degrees.get(p)<degrees.get(min)) {
-				min = p;
+			if(b.contains(p) && degrees.get(p)>degrees.get(max)) {
+				max = p;
 			}
 		}
-		return min;
+		return max;
 	}
 	
 	public ArrayList<Point> MIS2 (ArrayList<Point> points, int edgeThreshold){
@@ -226,7 +226,7 @@ public class DefaultTeam {
 			whitePs.removeAll(neighbor(start, points, edgeThreshold));
 			degrees = voisinDevoisin(points, degrees, start, edgeThreshold,whitePs);
 			if(whitePs.size()>0)
-				start = min(degrees,whitePs);
+				start = max(degrees,whitePs);
 		}
 		System.out.println("GRIS EST" + greyPs);
 		return blackPs;
