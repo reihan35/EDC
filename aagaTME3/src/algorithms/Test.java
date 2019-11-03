@@ -7,7 +7,7 @@ import java.time.Instant;
 public class Test {
 
 	public static void main(String[] args) {
-		final File folder = new File("TAILLE_5000");
+		final File folder = new File("500x500");
 		int somme_taille = 0;
 		long somme_tps = 0;
     	for (File file : folder.listFiles()) {

@@ -24,30 +24,40 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class DefaultTeam {
+	
+	
+	/*public ArrayList<Point> calculConnectedDominatingSet(ArrayList<Point> points, int edgeThreshold) {
+		edgeThreshold = 50;
+		//System.out.println(points);
+		//ArrayList<Point> points2 = (ArrayList<Point>) points.clone();
+		System.out.println("je suis eeedddggggg" + edgeThreshold);
+		for(int i = 0;i< 100;i++) {
+			///generateGraph(1000,1000,1000,edgeThreshold);
+			printToFile("input_"+i+"_500.points", generateGraph(1000,1000,100,edgeThreshold));
+		}
+		//ArrayList<Point> point3 = MIS2(points, edgeThreshold);
+		//point3.addAll(EDC(point3, points2, edgeThreshold));
+		
+		return points;
+		//return point3.size();
+		//return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold))).size();
+
+	}*/
+	
 	public static int calculConnectedDominatingSet(String name, int edgeThreshold) {
 		ArrayList<Point> points = readFromFile(name);
 		System.out.println(name);
-		//System.out.println(points);
-		ArrayList<Point> points2 = (ArrayList<Point>) points.clone();
-		/*for(int i = 0;i< 100;i++) {
-			///generateGraph(1000,1000,1000,edgeThreshold);
-			printToFile("input_"+i+"_5000.points", generateGraph(1000,1000,5000,edgeThreshold));
+		
+		//ArrayList<Point> points2 = (ArrayList<Point>) points.clone();
+		//ArrayList<Point> point3 = MIS2(points, edgeThreshold);
+		//point3.addAll(EDC(point3, points2, edgeThreshold));
+		
+		//return 0;
+		//return point3.size();
+		return TreeToPoints(calculSteiner(points, edgeThreshold, maximalIndependentSet(points, edgeThreshold))).size();
 
-		}*/
-		ArrayList<Point> point3 = MIS2(points, edgeThreshold);
-		point3.addAll(EDC(point3, points2, edgeThreshold));
-		return point3.size();
 	}
 	
-	/*generateGraph(width, heigth, nb, edgeTreshold) :
-		result : ArrayList<Point>;
-		while result.size() != nb :
-		add random points in result until result.size() == nb
-		compute connected components of result15
-		Ensemble Dominant Connexe Glouton
-		if there is multiple connected components :
-		keep only the biggest connected components in points (remove
-		the points that are in smaller components)*/
 	
 	
 	public static ArrayList<Point> generateGraph(int w,int h,int nb,int edgeTreshold) {
@@ -83,21 +93,7 @@ public class DefaultTeam {
 		System.out.println("je finis ou pas !");
 		return marquee;
 	}
-	/*public ArrayList<Point> S-MIS(ArrayList<Point> points, int edgeThreshold){
-		ArrayList<Point> blackPoints = maximalIndependentSet(points, edgeThreshold);
-		ArrayList<Point> clonePointes = ((ArrayList<Point>) points.clone());
-		clonePointes.removeAll(blackPoints);
-		ArrayList<Point> greyPoints = clonePointes;
-		ArrayList<Integer> ints = new ArrayList<Integer>();
-		ints.add(5);
-		ints.add(4);
-		ints.add(3);
-		ints.add(2);
-		ArrayList<Point> bluePoints = new ArrayList<Point>();
-		for(int i : ints) {
-			
-		}
-	}*/
+
 	public static ArrayList<Point> TreeToPoints(Tree2D tree){
 		System.out.println("je rentre dedans");
 
@@ -126,20 +122,27 @@ public class DefaultTeam {
 				result.add((Point) point.clone());
 		return result;
 	}
-	/*public boolean Verify2Hopes(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> fP) {
+	
+	public boolean Verify2Hopes(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> fP) {
 		System.out.println("FP"+ fP);
-		for(Point p : points) {
-			for(Point q : points) {
-				if (p!=q && !voisDevois(p, fP, edgeThreshold).contains(q)) {
-					System.out.println(p);
-					System.out.println(q);
-					System.out.println(voisDevois(p, fP, edgeThreshold));
-					return false;
+		boolean yes = true;
+		boolean oui = true;
+		for(Point p : fP) {
+			for (Point t : neighbor(p, points, edgeThreshold)) {
+				for(Point s : neighbor(t, points, edgeThreshold)) {
+					if (fP.contains(s)) {
+						//System.out.println("je rentre pas");
+						yes = true;
+					}
 				}
 			}
+			System.out.println(yes);
+			System.out.println(oui);
+			oui = oui && yes;
 		}
-		return true;
-	}*/
+		return oui;
+	}
+	
 	public static ArrayList<Point> nsOf(int edgeThreshold,ArrayList<Point> points , int x , int y){
 		for(Point p : points) {
 			if ((p.x == x) && (p.y == y)){
@@ -159,22 +162,6 @@ public class DefaultTeam {
 			}
 		}
 		return results;
-		/*if(results.get(0)!=null) {
-			return results.get(0);
-		}
-		else {
-			return null;
-		}
-		/*for (Point s : results) {
-			for(Point r : neighbor(s, points, edgeThreshold)) {
-				for (Point q : neighbor(r, points, edgeThreshold)) {
-					if (b.contains(q)) {
-						return q;
-					}
-				}
-			}
-		}
-		return null;*/
 	}
 	
 	public static HashMap<Point, Integer> voisinDevoisin(ArrayList<Point> points,HashMap<Point,Integer> degrees,Point p,int edgeThreshold,ArrayList<Point> w){
@@ -238,51 +225,6 @@ public class DefaultTeam {
 		return null;
 		
 	}
-	
-	public static ArrayList<Point> MIS3 (ArrayList<Point> points, int edgeThreshold){
-		ArrayList<Point> whitePs = points;
-		ArrayList<Point> blackPs = new ArrayList<Point>();
-		ArrayList<Point> greyPs = new ArrayList<Point>();
-		
-		
-		Point start = whitePs.get(0);
-		System.out.println("je suis premier" + whitePs.get(0));
-		while (whitePs.size() > 0) {
-			System.out.println("whar");
-			System.out.println(whitePs);
-			whitePs.remove(start);
-			blackPs.add(start);
-			greyPs.addAll(neighbor(start, points, edgeThreshold));
-			whitePs.removeAll(neighbor(start, points, edgeThreshold));
-			if (whitePs.size()>0) {
-				
-				/*for(Point p : whitePs) {
-					for(Point s : neighbor(p, points, edgeThreshold)) {
-						for(Point q : neighbor(s, points, edgeThreshold)) {
-							System.out.println("JE COMPREND PAS" + neighbor(q, points, edgeThreshold));
-							if(blackPs.contains(q)) {
-								System.out.println("je rentre pas la");
-								start = p;
-							}
-							else {
-								start = whitePs.get(0);
-
-							}
-						}
-					}
-				}*/
-				start = whitePs.get(0);
-
-			}
-			//start = whitePs.get(0);
-
-		}
-
-		System.out.println("GRIS EST" + greyPs);
-		return blackPs;
-				//start = whitePs.get(0);
-				//hasVoisDeVoisBlack(p, points, edgeThreshold, blackPs);
-		}
 	
 	//Cette fonction renvoie la liste des composants aux quels p apprtient
 	public static ArrayList<ArrayList<Point>> ListOfCompos(ArrayList<ArrayList<Point>> comps,Point p ){
@@ -494,7 +436,7 @@ public class DefaultTeam {
 		}
 	}
 
-	public class Arete {
+	public static class Arete {
 
 		private PointIdent p;
 		private PointIdent p2;
@@ -584,7 +526,7 @@ public class DefaultTeam {
 		return R;
 	}
 
-	/*public static ArrayList<Arete> kruskal(ArrayList<Point> points2, ArrayList<Point> points3, double[][] M) {
+	public static ArrayList<Arete> kruskal(ArrayList<Point> points2, ArrayList<Point> points3, double[][] M) {
 
 		ArrayList<Arete> aretes = new ArrayList<Arete>();
 
@@ -724,12 +666,12 @@ public class DefaultTeam {
 
 		return sol;
 
-	}*/
+	}
 
-	HashMap<Arete, Boolean> test = new HashMap<>();
+	static HashMap<Arete, Boolean> test = new HashMap<>();
 	int cpt = 0;
 
-	public Tree2D aretesToTree(Point p, ArrayList<Arete> aretes) {
+	public static Tree2D aretesToTree(Point p, ArrayList<Arete> aretes) {
 		ArrayList<Arete> newArete = (ArrayList<Arete>) aretes.clone();
 		ArrayList<Point> succ = new ArrayList<>();
 
@@ -759,11 +701,11 @@ public class DefaultTeam {
 		return new Tree2D(p, subtrees);
 	}
 
-	public Tree2D areteToTree(ArrayList<Arete> aretes) {
+	public static Tree2D areteToTree(ArrayList<Arete> aretes) {
 		return aretesToTree(aretes.get(0).getP().pt, aretes);
 	}
 
-	public ArrayList<Arete> replace(Arete a, ArrayList<Point> points, int[][] paths) {
+	public static ArrayList<Arete> replace(Arete a, ArrayList<Point> points, int[][] paths) {
 		PointIdent p = a.getP();
 		PointIdent q = a.getQ();
 		int nbP = -1;
@@ -795,7 +737,7 @@ public class DefaultTeam {
 
 	}
 
-	/*public Tree2D calculSteiner(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> hitPoints) {
+	public static Tree2D calculSteiner(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> hitPoints) {
 
 		ArrayList<Object> result = floydWarshall(points, edgeThreshold);
 
@@ -904,5 +846,5 @@ public class DefaultTeam {
 		Tree2D sol1 = T0;
 		return T0;
 
-	}*/
+	}
 }
